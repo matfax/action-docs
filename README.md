@@ -28,12 +28,18 @@ jobs:
 |------|-------------|---------|----------|
 | action\_docs\_debug\_mode | Enable debug mode | false | false |
 | action\_docs\_git\_commit\_message | Commit message | chore(action-docs): automated action | false |
-| action\_docs\_git\_push | If true it will commit and push the changes | true | false |
-| action\_docs\_template\_file | Template file to use for rendering the markdown docs | /src/default\_template.tpl | false |
+| action\_docs\_template\_file | Template file to use for rendering the markdown docs | ./src/default\_template.tpl | false |
 | action\_docs\_working\_dir | Directory that contains the action.yml and README.md | . | false |
+| create\_pr | Create/update PR for documentation changes | true | false |
+| pr\_body | Body for the pull request | Automated documentation update by action-docs | false |
+| pr\_branch | Branch name for the pull request | action-docs/update-documentation | false |
+| pr\_title | Title for the pull request | Update action documentation | false |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| num\_changed | Number of files changed |
+| pr\_number | Pull request number (if created) |
+| pr\_url | Pull request URL (if created) |
 <!--- END_ACTION_DOCS --->

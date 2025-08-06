@@ -1,5 +1,5 @@
 name: action-docs
-author: Derek Rada
+author: Derek Rada, Matthias Fax
 description: Github action that generates docs for a github action and injects them into the README.md
 inputs:
   action_docs_working_dir:
@@ -49,28 +49,33 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Setup gomplate
-      shell: bash
-      run: |
-        # Install gomplate binary
-        wget -O /tmp/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.6.0/gomplate_linux-amd64
-        chmod 755 /tmp/gomplate
-        sudo mv /tmp/gomplate /usr/local/bin/gomplate
+    - name: Checkout repository
+      uses: actions/checkout@v4.2.2
+      with:
+        # For push events, checkout the pushed ref
+        # For pull_request events, checkout the PR branch (head ref)
+        ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+        # Fetch full history to ensure we have the complete branch
+        fetch-depth: 0
+    
+    - name: Process documentation with gomplate
+      id: process-docs
+      uses: ./docker-action
+      with:
+        working_dir: ${{ inputs.action_docs_working_dir }}
+        template_file: ${{ inputs.action_docs_template_file }}
+        default_template: ${{ github.action_path }}/src/README.tpl
+        debug_mode: ${{ inputs.action_docs_debug_mode }}
 
-    - name: Generate documentation
+    - name: Check for changes
       id: generate-docs
       shell: bash
       run: ${{ github.action_path }}/src/generate-docs.sh
-      env:
-        INPUT_ACTION_DOCS_WORKING_DIR: ${{ inputs.action_docs_working_dir }}
-        INPUT_ACTION_DOCS_TEMPLATE_FILE: ${{ inputs.action_docs_template_file }}
-        INPUT_ACTION_DOCS_DEBUG_MODE: ${{ inputs.action_docs_debug_mode }}
-        GITHUB_ACTION_PATH: ${{ github.action_path }}
 
     - name: Create Pull Request
       id: create-pr
       if: ${{ inputs.create_pr == 'true' && steps.generate-docs.outputs.num_changed > 0 }}
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v7.0.8
       with:
         token: ${{ github.token }}
         commit-message: ${{ inputs.action_docs_git_commit_message }}

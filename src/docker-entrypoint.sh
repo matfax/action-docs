@@ -31,7 +31,7 @@ git_setup () {
   git config --global user.name ${GITHUB_ACTOR}
   git config --global user.email ${GITHUB_ACTOR}@users.noreply.github.com
   if $(git rev-parse --is-shallow-repository); then git fetch --unshallow ; fi
-  git checkout "${GITHUB_HEAD_REF}"
+  git checkout "${GITHUB_HEAD_REF:-${GITHUB_SHA}}"
 
   debug_message "End git_setup"
 

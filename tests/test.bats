@@ -30,36 +30,53 @@ teardown_file() {
     rm -rf "${BATS_TEST_DIRNAME}/tmp"
 }
 
-@test "Should commit README.md" {
+@test "Should generate README.md" {
 
     export GITHUB_WORKSPACE="${BATS_TEST_DIRNAME}/tmp/local"
-    export GITHUB_HEAD_REF='test-branch'
-    export GITHUB_ACTOR='autotest'
     export INPUT_ACTION_DOCS_WORKING_DIR="${GITHUB_WORKSPACE}"
     export INPUT_ACTION_DOCS_DEBUG_MODE='true'
-    export INPUT_ACTION_DOCS_GIT_PUSH='true'
+    export GITHUB_ACTION_PATH="${DIR_PATH}"
+    export GITHUB_OUTPUT="/tmp/github_output"
+    
+    # Create output file
+    touch "$GITHUB_OUTPUT"
  
     config_test_env "$GITHUB_WORKSPACE"
 
-    run "${SRC_BASE_DIR}/docker-entrypoint.sh"
+    run "${SRC_BASE_DIR}/generate-docs.sh"
 
     assert_success
-    assert_output --partial "Automatic commit"
+    assert_output --partial "Create the documentation"
+    
+    # Check that num_changed was written to GITHUB_OUTPUT
+    run grep "num_changed=1" "$GITHUB_OUTPUT"
+    assert_success
 }
 
-@test "Should not commit README.md" {
+@test "Should detect no changes when README.md already up to date" {
 
     export GITHUB_WORKSPACE="${BATS_TEST_DIRNAME}/tmp/local"
-    export GITHUB_HEAD_REF='test-branch'
-    export GITHUB_ACTOR='autotest'
     export INPUT_ACTION_DOCS_WORKING_DIR="${GITHUB_WORKSPACE}"
     export INPUT_ACTION_DOCS_DEBUG_MODE='true'
-    export INPUT_ACTION_DOCS_GIT_PUSH='false'
+    export GITHUB_ACTION_PATH="${DIR_PATH}"
+    export GITHUB_OUTPUT="/tmp/github_output_2"
+    
+    # Create output file
+    touch "$GITHUB_OUTPUT"
  
     config_test_env "$GITHUB_WORKSPACE"
-
-    run "${SRC_BASE_DIR}/docker-entrypoint.sh"
+    
+    # Run twice to ensure second run detects no changes
+    "${SRC_BASE_DIR}/generate-docs.sh"
+    
+    # Clear output file for second run
+    > "$GITHUB_OUTPUT"
+    
+    run "${SRC_BASE_DIR}/generate-docs.sh"
 
     assert_success
-    assert_output --partial "name=num_changed::1"
+    
+    # Check that num_changed was 0 on second run
+    run grep "num_changed=0" "$GITHUB_OUTPUT"
+    assert_success
 }

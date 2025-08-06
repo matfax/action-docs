@@ -3,44 +3,30 @@
 config_test_env(){
     WORKING_DIR=$1
 
-    _create_repo "${BATS_TEST_DIRNAME}/tmp/remote"
-    cd "${BATS_TEST_DIRNAME}/tmp/remote"
-    _create_initial_commit
-    git branch "${GITHUB_HEAD_REF}"
-    COMMIT_SHA=$(_get_latest_commit)
-
-    _create_repo "$WORKING_DIR"
+    # Create a simple working directory with the necessary files
+    mkdir -p "$WORKING_DIR"
     cd "$WORKING_DIR"
-    git remote add origin "${BATS_TEST_DIRNAME}/tmp/remote"
-    git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin "$COMMIT_SHA":"${GITHUB_HEAD_REF}"
-}
-
-_create_repo(){
-    name=$1
-
-    git init $name
-}
-
-_create_initial_commit(){
+    
+    # Initialize git repository
+    git init
+    git config user.name "Test User"
+    git config user.email "test@example.com"
+    
+    # Create the required files
     _init_readme
     cp ${DIR_PATH}/action.yml .
+    
+    # Stage files for git status to work correctly
     git add README.md action.yml
-    git commit -sm 'initial commit'
-}
-
-_get_latest_commit(){
-    echo "$(git rev-parse --verify HEAD)"
 }
 
 _init_readme(){
 cat <<EOF > README.md
+# Test Action
+
 <!--- BEGIN_ACTION_DOCS --->
 <!--- END_ACTION_DOCS --->
 EOF
-}
-
-_update_readme(){
-    echo 'fin' >> README.md
 }
 
 # mkdir -p test

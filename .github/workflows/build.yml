@@ -13,22 +13,27 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
     - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.ref }}
 
     - name: Should generate README.md for test_a
       uses: ./
       with:
         action_docs_working_dir: examples/test_a
-        action_docs_git_push: 'false'
+        create_pr: 'false'
 
     - name: Should generate README.md for test_b
       uses: ./
       with:
         action_docs_working_dir: examples/test_b
-        action_docs_git_push: 'false'
+        create_pr: 'false'
 
     - name: Generate this repos README.md
       uses: ./
+      with:
+        pr_title: 'docs: update action documentation'
+        pr_body: |
+          Automated documentation update for action-docs.
+          
+          This PR was created automatically when documentation changes were detected.

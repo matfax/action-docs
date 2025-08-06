@@ -9,11 +9,7 @@ inputs:
   action_docs_template_file:
     description: Template file to use for rendering the markdown docs
     required: false
-    default: '/src/default_template.tpl'
-  action_docs_git_push:
-    description: If true it will commit and push the changes
-    required: false
-    default: 'true'
+    default: './src/default_template.tpl'
   action_docs_git_commit_message:
     description: Commit message
     required: false
@@ -22,14 +18,68 @@ inputs:
     description: "Enable debug mode"
     required: false
     default: false
+  create_pr:
+    description: Create/update PR for documentation changes
+    required: false
+    default: 'true'
+  pr_title:
+    description: Title for the pull request
+    required: false
+    default: 'Update action documentation'
+  pr_body:
+    description: Body for the pull request
+    required: false
+    default: 'Automated documentation update by action-docs'
+  pr_branch:
+    description: Branch name for the pull request
+    required: false
+    default: 'action-docs/update-documentation'
 
-# outputs:
-#   num_changed:
-#     description: Number of files changed
+outputs:
+  num_changed:
+    description: Number of files changed
+    value: ${{ steps.generate-docs.outputs.num_changed }}
+  pr_number:
+    description: Pull request number (if created)
+    value: ${{ steps.create-pr.outputs.pull-request-number }}
+  pr_url:
+    description: Pull request URL (if created)
+    value: ${{ steps.create-pr.outputs.pull-request-url }}
 
 runs:
-  using: docker
-  image: Dockerfile
+  using: composite
+  steps:
+    - name: Setup gomplate
+      shell: bash
+      run: |
+        # Install gomplate binary
+        wget -O /tmp/gomplate https://github.com/hairyhenderson/gomplate/releases/download/v3.6.0/gomplate_linux-amd64
+        chmod 755 /tmp/gomplate
+        sudo mv /tmp/gomplate /usr/local/bin/gomplate
+
+    - name: Generate documentation
+      id: generate-docs
+      shell: bash
+      run: ${{ github.action_path }}/src/generate-docs.sh
+      env:
+        INPUT_ACTION_DOCS_WORKING_DIR: ${{ inputs.action_docs_working_dir }}
+        INPUT_ACTION_DOCS_TEMPLATE_FILE: ${{ inputs.action_docs_template_file }}
+        INPUT_ACTION_DOCS_DEBUG_MODE: ${{ inputs.action_docs_debug_mode }}
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+
+    - name: Create Pull Request
+      id: create-pr
+      if: ${{ inputs.create_pr == 'true' && steps.generate-docs.outputs.num_changed > 0 }}
+      uses: peter-evans/create-pull-request@v7
+      with:
+        token: ${{ github.token }}
+        commit-message: ${{ inputs.action_docs_git_commit_message }}
+        title: ${{ inputs.pr_title }}
+        body: ${{ inputs.pr_body }}
+        branch: ${{ inputs.pr_branch }}
+        add-paths: |
+          ${{ inputs.action_docs_working_dir }}/README.md
+        delete-branch: true
 
 branding:
   icon: file-text

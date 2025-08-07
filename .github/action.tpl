@@ -1,22 +1,55 @@
 {{- define "escape_chars" }}{{ . | strings.ReplaceAll "_" "\\_" | strings.ReplaceAll "|" "\\|" | strings.ReplaceAll "*" "\\*" }}{{- end }}
-{{- define "sanatize_string" }}{{ . | strings.ReplaceAll "\n\n" "<br><br>" | strings.ReplaceAll "  \n" "<br>" | strings.ReplaceAll "\n" "<br>" | tmpl.Exec "escape_chars" }}{{- end }}
+
+{{- define "escape_spaces" }}{{ . | strings.ReplaceAll " " "_" }}{{- end }}
+
+{{- define "sanitize_string" }}{{ . | strings.ReplaceAll "\n\n" "<br><br>" | strings.ReplaceAll " \n" "<br>" | strings.ReplaceAll "\n" "<br>" | tmpl.Exec "escape_chars" }}{{- end }}
+
+{{- define "sanitize_url" }}{{ . | strings.ReplaceAll "_" "__" | strings.ReplaceAll "\n" " " | strings.ReplaceAll "<br>" " " | strings.ReplaceAll " " " " | strings.ReplaceAll "-" "--" | tmpl.Exec "escape_spaces" }}{{- end }}
+
+{{- define "sanitize_boolean" }}{{ . | strings.ReplaceAll "true" "yes" | strings.ReplaceAll "false" "no" | tmpl.Exec "sanitize_url" }}{{- end }}
+
+{{- define "boolean_color" }}{{ . | strings.ReplaceAll "true" "important" | strings.ReplaceAll "false" "inactive" | tmpl.Exec "sanitize_url" }}{{- end }}
+
 {{- $action := (datasource "action") -}}
+
 ## Inputs
 
-| Name | Description | Default | Required |
-|------|-------------|---------|----------|
-{{- if has $action "inputs" }}
 {{- range $key, $input := $action.inputs }}
-| {{ tmpl.Exec "escape_chars" $key }} | {{ if (has $input "description") }}{{ tmpl.Exec "sanatize_string" $input.description }}{{ else }}{{ tmpl.Exec "escape_chars" $key }}{{ end }} | {{ if (has $input "default") }}{{ tmpl.Exec "sanatize_string" $input.default }}{{ else }}N/A{{ end }} | {{ if (has $input "required") }}{{ $input.required }}{{ else }}false{{ end }} |
-{{- end }}
+
+### {{ tmpl.Exec "escape_chars" $key }}
+
+![Required](https://img.shields.io/badge/Required-{{ if (has $input "required") }}{{ tmpl.Exec "sanitize_boolean" $input.required }}{{ else }}no{{ end }}-{{ if (has $input "required") }}{{ tmpl.Exec "boolean_color" $input.required }}{{ else }}inactive{{ end }}?style=flat-square)
+{{ if (has $input "default") }}![Default](https://img.shields.io/badge/Default-{{ tmpl.Exec "sanitize_url" $input.default }}-blue?style=flat-square){{ else }}![Default](https://img.shields.io/badge/Default-none-lightgrey?style=flat-square){{ end }}
+
+{{ tmpl.Exec "sanitize_string" $input.description }}
+
 {{- end }}
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-{{- if has $action "outputs" }}
 {{- range $key, $output := $action.outputs }}
-| {{ tmpl.Exec "escape_chars" $key }} | {{ if (has $output "description") }}{{ tmpl.Exec "sanatize_string" $output.description }}{{ else }}{{ tmpl.Exec "escape_chars" $key }}{{ end }} |
+
+### {{ tmpl.Exec "escape_chars" $key }}
+
+![Output](https://img.shields.io/badge/Output-{{ tmpl.Exec "sanitize_url" $key }}-green?style=flat-square)
+
+{{ tmpl.Exec "sanitize_string" $output.description }}
+
 {{- end }}
+
+## Usage
+
+```yaml
+- name: {{ $action.name }}
+  uses: {{ "${{ github.repository }}" }}@{{ "${{ github.ref }}" }}
+  with:
+{{- range $key, $input := $action.inputs }}
+    {{ $key }}: {{ if (has $input "default") }}{{ $input.default }}{{ else }}'your-value-here'{{ end }}
 {{- end }}
+```
+
+## Example Workflow
+
+```yaml
+{{ include ".github/workflows/documentation.yml" }}
+```

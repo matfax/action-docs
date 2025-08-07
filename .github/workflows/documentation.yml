@@ -26,6 +26,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'docs: update action documentation'
           title: 'docs: Update action documentation'
+          sign-commits: true
+          signoff: true
           body: |
             This pull request contains automated updates to the action README.
             

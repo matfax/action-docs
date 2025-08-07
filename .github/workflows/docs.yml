@@ -23,6 +23,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7.0.8
         with:
+          base: main
           commit-message: 'docs: update action documentation'
           title: 'docs: Update action documentation'
           sign-commits: true

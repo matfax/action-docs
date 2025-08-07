@@ -2,9 +2,20 @@ name: Documentation
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - '**.md'
+      - '**.tpl'
+      - '**/docs.yml'
+      - '**/action.yml'
   pull_request:
     branches: [main]
+    paths:
+      - '**.md'
+      - '**.tpl'
+      - '**/docs.yml'
+      - '**/action.yml'
 
 jobs:
   update:
@@ -28,6 +39,9 @@ jobs:
           title: 'docs: Update action documentation'
           sign-commits: true
           signoff: true
+          labels: |
+            documentation
+            auto-update
           body: |
             This pull request contains automated updates to the action README.
             

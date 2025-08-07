@@ -19,7 +19,9 @@
   uses: {{ "${{ github.repository }}" }}@{{ "${{ github.ref }}" }}
   with:
 {{- range $key, $input := $action.inputs }}
-    {{ $key }}: {{ if (has $input "default") }}{{ $input.default }}{{ else }}'your-value-here'{{ end }}
+    {{- if (has $input "description") }}
+    # {{ $input.description }}
+    {{- end }}{{ $key }}: {{ if (has $input "default") }}{{ $input.default }}{{ else }}'your-value-here'{{ end }}
 {{- end }}
 ```
 

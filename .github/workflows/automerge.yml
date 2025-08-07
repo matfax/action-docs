@@ -1,19 +1,23 @@
 name: Auto-Merge
+
 on:
   pull_request:
     types: [auto_merge_enabled]
 
+permissions:
+  contents: write      # Required for creating commits
+  pull-requests: read  # Required for reading PR details
+  issues: read        # Required for reading issue comments
+  checks: read        # Required for checking status checks
+  id-token: write      # Required for verified commit signing
+
 jobs:
-  helper:
-    name: Helper
+  automerge-helper:
+    name: Auto-Merge Helper
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: read
-      checks: read
-      id-token: write
+    environment: claude
     steps:
       - uses: matfax/verified-merge@main
         with:
           claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          check-timeout-seconds: 600

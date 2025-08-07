@@ -1,0 +1,19 @@
+name: Auto-Merge
+on:
+  pull_request:
+    types: [auto_merge_enabled]
+
+jobs:
+  helper:
+    name: Helper
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: read
+      checks: read
+      id-token: write
+    steps:
+      - uses: matfax/verified-merge@main
+        with:
+          claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

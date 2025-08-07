@@ -43,8 +43,14 @@ update_doc() {
         exit 3
     fi
 
-    sed -i -ne '/<!--- BEGIN_ACTION_DOCS --->/ {p; r /tmp/action_doc.md
-    }' -e ':a; n; /<!--- END_ACTION_DOCS --->/ {p; b}; ba}; p' "${WORKING_DIR}/README.md"
+    # Replace content between BEGIN_ACTION_DOCS and END_ACTION_DOCS markers
+    sed -i '/<!--- BEGIN_ACTION_DOCS --->/,/<!--- END_ACTION_DOCS --->/c\
+<!--- BEGIN_ACTION_DOCS --->' "${WORKING_DIR}/README.md"
+    # Insert the generated documentation after the BEGIN marker
+    sed -i '/<!--- BEGIN_ACTION_DOCS --->/r /tmp/action_doc.md' "${WORKING_DIR}/README.md"
+    # Add the END marker after the inserted content
+    sed -i '/<!--- BEGIN_ACTION_DOCS --->/a\
+<!--- END_ACTION_DOCS --->' "${WORKING_DIR}/README.md"
 
     debug_message "End update_doc"
 }

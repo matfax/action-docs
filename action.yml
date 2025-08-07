@@ -2,89 +2,26 @@ name: action-docs
 author: Derek Rada, Matthias Fax
 description: Github action that generates docs for a github action and injects them into the README.md
 inputs:
-  action_docs_working_dir:
+  working_dir:
     description: Directory that contains the action.yml and README.md
     required: false
     default: '.'
-  action_docs_template_file:
+  template_file:
     description: Template file to use for rendering the markdown docs
     required: false
-    default: './src/default_template.tpl'
-  action_docs_git_commit_message:
-    description: Commit message
+    default: '.github/action.tpl'
+  debug_mode:
+    description: Enable debug mode
     required: false
-    default: 'chore(action-docs): automated action'
-  action_docs_debug_mode:
-    description: "Enable debug mode"
-    required: false
-    default: false
-  create_pr:
-    description: Create/update PR for documentation changes
-    required: false
-    default: 'true'
-  pr_title:
-    description: Title for the pull request
-    required: false
-    default: 'Update action documentation'
-  pr_body:
-    description: Body for the pull request
-    required: false
-    default: 'Automated documentation update by action-docs'
-  pr_branch:
-    description: Branch name for the pull request
-    required: false
-    default: 'action-docs/update-documentation'
+    default: 'false'
 
 outputs:
   num_changed:
     description: Number of files changed
-    value: ${{ steps.generate-docs.outputs.num_changed }}
-  pr_number:
-    description: Pull request number (if created)
-    value: ${{ steps.create-pr.outputs.pull-request-number }}
-  pr_url:
-    description: Pull request URL (if created)
-    value: ${{ steps.create-pr.outputs.pull-request-url }}
 
 runs:
-  using: composite
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4.2.2
-      with:
-        # For push events, checkout the pushed ref
-        # For pull_request events, checkout the PR branch (head ref)
-        ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
-        # Fetch full history to ensure we have the complete branch
-        fetch-depth: 0
-    
-    - name: Process documentation with gomplate
-      id: process-docs
-      uses: ./docker-action
-      with:
-        working_dir: ${{ inputs.action_docs_working_dir }}
-        template_file: ${{ inputs.action_docs_template_file }}
-        default_template: ${{ github.action_path }}/src/README.tpl
-        debug_mode: ${{ inputs.action_docs_debug_mode }}
-
-    - name: Check for changes
-      id: generate-docs
-      shell: bash
-      run: ${{ github.action_path }}/src/generate-docs.sh
-
-    - name: Create Pull Request
-      id: create-pr
-      if: ${{ inputs.create_pr == 'true' && steps.generate-docs.outputs.num_changed > 0 }}
-      uses: peter-evans/create-pull-request@v7.0.8
-      with:
-        token: ${{ github.token }}
-        commit-message: ${{ inputs.action_docs_git_commit_message }}
-        title: ${{ inputs.pr_title }}
-        body: ${{ inputs.pr_body }}
-        branch: ${{ inputs.pr_branch }}
-        add-paths: |
-          ${{ inputs.action_docs_working_dir }}/README.md
-        delete-branch: true
+  using: docker
+  image: src/Dockerfile
 
 branding:
   icon: file-text

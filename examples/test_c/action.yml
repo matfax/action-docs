@@ -1,0 +1,23 @@
+name: test-c
+author: Test Author
+description: Test action C for fallback template testing
+inputs:
+  required_no_default:
+    description: Required input without default
+    required: true
+  optional_with_default:
+    description: Optional input with default
+    required: false
+    default: 'default_value'
+
+outputs:
+  num_changed:
+    description: Number of files changed
+
+runs:
+  using: docker
+  image: Dockerfile
+
+branding:
+  icon: file-text
+  color: gray-dark

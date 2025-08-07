@@ -23,11 +23,16 @@ update_doc() {
     fi
 
     echo "Create the documentation"
+    # Use fallback template if specified template doesn't exist
+    if [ ! -f "${TEMPLATE_FILE}" ]; then
+        TEMPLATE_FILE="/default.tpl"
+        echo "::notice::Template not found, using default: ${TEMPLATE_FILE}"
+    fi
     gomplate -d action="${WORKING_DIR}/action.yml" -f "${TEMPLATE_FILE}" -o /tmp/action_doc.md
 
     # Create README.md if it doesn't exist
     if [ ! -f "${WORKING_DIR}/README.md" ]; then
-        gomplate -d action="${WORKING_DIR}/action.yml" -f "${INPUT_DEFAULT_TEMPLATE}" -o "${WORKING_DIR}/README.md"
+        gomplate -d action="${WORKING_DIR}/action.yml" -f "${INPUT_TEMPLATE_FILE}" -o "${WORKING_DIR}/README.md"
     fi
 
     HAS_ACTION_DOCS=$(grep -E '(BEGIN|END)_ACTION_DOCS' "${WORKING_DIR}/README.md" | wc -l)

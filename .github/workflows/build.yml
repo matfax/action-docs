@@ -6,34 +6,68 @@ on:
   push:
     branches:
       - main
-jobs:
 
-  build:
-    name: 'Build example docs'
+jobs:
+  test_a:
+    name: Test A (default template path)
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4.2.2
 
-    - name: Should generate README.md for test_a
+    - name: Generate README.md for test_a
       uses: ./
       with:
-        action_docs_working_dir: examples/test_a
-        create_pr: 'false'
+        working_dir: examples/test_a
 
-    - name: Should generate README.md for test_b
+    - name: Verify output matches expected
+      run: |
+        if ! diff examples/test_a/README.md examples/test_a/README.expected.md; then
+          echo "::error file=examples/test_a/README.md::Generated output does not match expected for Test A (default template path)"
+          exit 1
+        fi
+        echo "::notice::Test A output matches expected (default template path)"
+
+  test_b:
+    name: Test B (custom template file)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4.2.2
+
+    - name: Generate README.md for test_b
       uses: ./
       with:
-        action_docs_working_dir: examples/test_b
-        create_pr: 'false'
+        working_dir: examples/test_b
+        template_file: examples/test_b/custom_template.tpl
 
-    - name: Generate this repos README.md
+    - name: Verify output matches expected
+      run: |
+        if ! diff examples/test_b/README.md examples/test_b/README.expected.md; then
+          echo "::error file=examples/test_b/README.md::Generated output does not match expected for Test B (custom template file)"
+          exit 1
+        fi
+        echo "::notice::Test B output matches expected (custom template file)"
+
+  test_c:
+    name: Test C (fallback template)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v4.2.2
+
+    - name: Generate README.md for test_c
       uses: ./
       with:
-        pr_title: 'docs: update action documentation'
-        pr_body: |
-          Automated documentation update for action-docs.
-          
-          This PR was created automatically when documentation changes were detected.
+        working_dir: examples/test_c
+
+    - name: Verify output matches expected
+      run: |
+        if ! diff examples/test_c/README.md examples/test_c/README.expected.md; then
+          echo "::error file=examples/test_c/README.md::Generated output does not match expected for Test C (fallback template)"
+          exit 1
+        fi
+        echo "::notice::Test C output matches expected (fallback template)"

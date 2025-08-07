@@ -23,9 +23,20 @@ name: Documentation
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - '**.md'
+      - '**.tpl'
+      - '**/docs.yml'
+      - '**/action.yml'
   pull_request:
     branches: [main]
+    paths:
+      - '**.md'
+      - '**.tpl'
+      - '**/docs.yml'
+      - '**/action.yml'
 
 jobs:
   update:
@@ -34,6 +45,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -49,6 +61,9 @@ jobs:
           title: 'docs: Update action documentation'
           sign-commits: true
           signoff: true
+          labels: |
+            documentation
+            auto-update
           body: |
             This pull request contains automated updates to the action README.
             
@@ -60,13 +75,6 @@ jobs:
           delete-branch: true
 
 ```
-
-## Requirements
-
-For the example workflow above to work with `peter-evans/create-pull-request`, you need to enable **"Allow GitHub Actions to create and approve pull requests"** in your repository settings:
-
-- Go to **Settings → Actions → General → Workflow permissions**
-- Check **"Allow GitHub Actions to create and approve pull requests"**
 
 ## Inputs
 

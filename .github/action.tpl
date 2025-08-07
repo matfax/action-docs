@@ -26,7 +26,7 @@
 ## Example Workflow
 
 ```yaml
-{{ include ".github/workflows/docs.yml" }}
+{{ (datasource ".github/workflows/docs.yml") }}
 ```
 
 ## Inputs

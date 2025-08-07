@@ -1,5 +1,5 @@
-# test-c
-Test action C for fallback template testing.
+# fallback-test
+Test action for verifying fallback template functionality.
 
 # Configuration
 <!--- BEGIN_ACTION_DOCS --->

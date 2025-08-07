@@ -41,7 +41,7 @@ jobs:
       uses: ./
       with:
         working_dir: examples/test_b
-        template_file: examples/test_b/custom_template.tpl
+        template_file: custom_template.tpl
 
     - name: Verify output matches expected
       run: |

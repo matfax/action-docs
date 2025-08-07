@@ -12,6 +12,23 @@
 
 {{- $action := (datasource "action") -}}
 
+## Usage
+
+```yaml
+- name: {{ $action.name }}
+  uses: {{ "${{ github.repository }}" }}@{{ "${{ github.ref }}" }}
+  with:
+{{- range $key, $input := $action.inputs }}
+    {{ $key }}: {{ if (has $input "default") }}{{ $input.default }}{{ else }}'your-value-here'{{ end }}
+{{- end }}
+```
+
+## Example Workflow
+
+```yaml
+{{ include ".github/workflows/docs.yml" }}
+```
+
 ## Inputs
 
 {{- range $key, $input := $action.inputs }}
@@ -36,20 +53,3 @@
 {{ tmpl.Exec "sanitize_string" $output.description }}
 
 {{- end }}
-
-## Usage
-
-```yaml
-- name: {{ $action.name }}
-  uses: {{ "${{ github.repository }}" }}@{{ "${{ github.ref }}" }}
-  with:
-{{- range $key, $input := $action.inputs }}
-    {{ $key }}: {{ if (has $input "default") }}{{ $input.default }}{{ else }}'your-value-here'{{ end }}
-{{- end }}
-```
-
-## Example Workflow
-
-```yaml
-{{ include ".github/workflows/documentation.yml" }}
-```

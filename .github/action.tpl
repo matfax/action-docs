@@ -28,7 +28,7 @@
 ## Example Workflow
 
 ```yaml
-{{ (datasource ".github/workflows/docs.yml") }}
+{{ file.Read ".github/workflows/docs.yml" }}
 ```
 
 ## Inputs

@@ -61,6 +61,13 @@ jobs:
 
 ```
 
+## Requirements
+
+For the example workflow above to work with `peter-evans/create-pull-request`, you need to enable **"Allow GitHub Actions to create and approve pull requests"** in your repository settings:
+
+- Go to **Settings → Actions → General → Workflow permissions**
+- Check **"Allow GitHub Actions to create and approve pull requests"**
+
 ## Inputs
 
 ### debug_mode

@@ -65,7 +65,7 @@ jobs:
           message: |
             docs: update action documentation
 
-            The documentation has been regenerated from the action.yml file using the configured template.
+            The documentation has been regenerated from the action.yml.
 
       - name: Create Pull Request
         if: ${{ github.event_name == 'push' }}
@@ -82,7 +82,7 @@ jobs:
           commit-message: |
             docs: update action documentation
 
-            The documentation has been regenerated from the action.yml file using the configured template.
+            The documentation has been regenerated from the action.yml.
           body: |
             This pull request contains automated updates to the action README.
             
